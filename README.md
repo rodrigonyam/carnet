@@ -39,6 +39,9 @@ VITE_FIREBASE_APP_ID=...
 npm run dev
 ```
 
+Local development runs at `http://localhost:5173/`.
+If port 5173 is busy, Vite may automatically use `http://localhost:5174/` (or another available port).
+
 ## 4) Build
 
 ```bash
