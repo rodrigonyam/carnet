@@ -46,6 +46,13 @@ npm run build
 npm run preview
 ```
 
+## GitHub Pages Deploy
+
+- This repo includes a GitHub Actions workflow at `.github/workflows/deploy-pages.yml`.
+- In GitHub, open **Settings → Pages** and set **Source** to **GitHub Actions**.
+- Push changes to the `main` branch to trigger deployment.
+- The site will be available at `https://rodrigonyam.github.io/carnet/`.
+
 ## Current Features
 
 - Dashboard with quick stats by category
