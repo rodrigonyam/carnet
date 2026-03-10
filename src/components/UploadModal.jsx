@@ -71,7 +71,8 @@ export default function UploadModal({ onClose }) {
       onClose()
     } catch (err) {
       console.error(err)
-      setError('Upload failed. Check your Firebase credentials and try again.')
+      const details = err?.code ? `${err.code}: ${err.message}` : (err?.message || 'Unknown Firebase error')
+      setError(`Upload failed. ${details}`)
     } finally {
       setUploading(false)
       setProgress(0)
