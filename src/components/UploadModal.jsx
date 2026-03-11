@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { storage, db } from '../firebase'
+import { db } from '../firebase'
+import { uploadFileToS3 } from '../services/s3Upload'
 import { X, UploadCloud, FileText, Image, Scan, Film } from 'lucide-react'
 
 const CATEGORIES = [
@@ -40,32 +40,24 @@ export default function UploadModal({ onClose }) {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        const storageRef = ref(storage, `carnet/${category}/${Date.now()}_${file.name}`)
-        const task = uploadBytesResumable(storageRef, file)
+        const uploaded = await uploadFileToS3({
+          file,
+          category,
+          onProgress: (pct) => {
+            setProgress(Math.round(((i + pct / 100) / files.length) * 100))
+          },
+        })
 
-        await new Promise((resolve, reject) => {
-          task.on(
-            'state_changed',
-            (snap) => {
-              setProgress(Math.round(((i + snap.bytesTransferred / snap.totalBytes) / files.length) * 100))
-            },
-            reject,
-            async () => {
-              const url = await getDownloadURL(task.snapshot.ref)
-              await addDoc(collection(db, 'entries'), {
-                title:       title || file.name,
-                notes,
-                category,
-                fileName:    file.name,
-                fileType:    file.type,
-                fileSize:    file.size,
-                downloadURL: url,
-                storagePath: storageRef.fullPath,
-                createdAt:   serverTimestamp(),
-              })
-              resolve()
-            }
-          )
+        await addDoc(collection(db, 'entries'), {
+          title:       title || file.name,
+          notes,
+          category,
+          fileName:    file.name,
+          fileType:    file.type,
+          fileSize:    file.size,
+          downloadURL: uploaded.fileUrl,
+          storagePath: uploaded.key,
+          createdAt:   serverTimestamp(),
         })
       }
       onClose()

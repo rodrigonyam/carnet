@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { doc, deleteDoc } from 'firebase/firestore'
-import { ref, deleteObject } from 'firebase/storage'
-import { db, storage } from '../firebase'
+import { db } from '../firebase'
+import { deleteFileFromS3 } from '../services/s3Upload'
 import { FileText, Image, Scan, Film, Trash2, ExternalLink, FileQuestion } from 'lucide-react'
 
 const CATEGORY_ICONS = {
@@ -41,7 +41,7 @@ export default function FileCard({ entry, onDeleted }) {
     try {
       await deleteDoc(doc(db, 'entries', entry.id))
       if (entry.storagePath) {
-        await deleteObject(ref(storage, entry.storagePath))
+        await deleteFileFromS3({ key: entry.storagePath })
       }
       onDeleted(entry.id)
     } catch (err) {
