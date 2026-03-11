@@ -1,13 +1,13 @@
 # Carnet
 
-A Vite + React web app to store and browse your family archive files (photos, scans, Word/PDF documents, videos, and more) using Firebase Storage + Firestore.
+A Vite + React web app to store and browse your family archive files (photos, scans, Word/PDF documents, videos, and more) using AWS S3 + Firestore.
 
 ## Tech Stack
 
 - React + Vite
 - Tailwind CSS
 - Firebase Firestore (metadata)
-- Firebase Storage (files)
+- AWS S3 (files via pre-signed URLs)
 
 ## 1) Install dependencies
 
@@ -20,7 +20,6 @@ npm install
 Create a Firebase project and enable:
 
 - Firestore Database
-- Storage
 
 Then fill in `.env` with your Firebase web app credentials:
 
@@ -31,9 +30,39 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
+
+# Backend API that signs S3 uploads/deletes
+VITE_S3_API_BASE_URL=http://localhost:8787
 ```
 
-## 3) Run locally
+## 3) Configure S3 backend
+
+From `backend/.env.example`, create `backend/.env` and fill:
+
+```env
+PORT=8787
+AWS_REGION=...
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+S3_BUCKET=...
+S3_PUBLIC_BASE_URL=...
+CORS_ORIGIN=http://localhost:5173
+```
+
+Install and run backend:
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+The backend exposes:
+
+- `POST /api/s3/presign-upload`
+- `POST /api/s3/delete`
+
+## 4) Run frontend locally
 
 ```bash
 npm run dev
@@ -42,7 +71,7 @@ npm run dev
 Local development runs at `http://localhost:5173/`.
 If port 5173 is busy, Vite may automatically use `http://localhost:5174/` (or another available port).
 
-## 4) Build
+## 5) Build
 
 ```bash
 npm run build
@@ -64,7 +93,7 @@ npm run preview
 - Archive page with category filters + search
 - Thumbnail preview for images
 - File open in new tab
-- Delete file (Firestore metadata + Storage object)
+- Delete file (Firestore metadata + S3 object)
 
 ## Data Model (`entries` collection)
 
